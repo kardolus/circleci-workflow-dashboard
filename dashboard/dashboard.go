@@ -60,8 +60,8 @@ func Build(circleCIClient circleci.CircleCI, filter *circleci.Filter, featureFla
 		filteredPipelines := pipelines.FilteredPerBranch()
 		for branch, pipeline := range pipelines.LatestPerBranch() {
 
-			if branchFilter, _ := strconv.ParseBool(os.Getenv("BRANCH_FILTER")); branchFilter {
-				if branch != "branchFilter" {
+			if branchFilter := os.Getenv("BRANCH_FILTER"); branchFilter != "" {
+				if branch != branchFilter {
 					continue
 				}
 			}
@@ -117,6 +117,7 @@ func (d Monitors) AddWorkflows(workflowInfo WorkflowDetails, featureFlags *Featu
 		if d.AlreadyExists(monitor) {
 			continue
 		}
+
 		status, err := workflowInfo.CircleCIClient.WorkflowStatus(workflowInfo.FilteredPipelines, workflow)
 		if err != nil {
 			return nil, err
@@ -128,6 +129,7 @@ func (d Monitors) AddWorkflows(workflowInfo WorkflowDetails, featureFlags *Featu
 			}
 			status = fmt.Sprintf("%s %s", status, errorStatus)
 		}
+
 		link := workflowInfo.CircleCIClient.WorkflowLink(workflowInfo.Project, workflowInfo.Pipeline, workflow)
 		monitor.Status = status
 		monitor.Link = link
