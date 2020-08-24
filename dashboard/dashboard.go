@@ -45,6 +45,9 @@ func Build(circleCIClient circleci.CircleCI, filter *circleci.Filter, featureFla
 		}
 		filteredPipelines := pipelines.FilteredPerBranch()
 		for branch, pipeline := range pipelines.LatestPerBranch() {
+			if branch != "master" {
+				continue
+			}
 			workflows, err := circleCIClient.GetWorkflowsForPipeline(pipeline)
 			if err != nil {
 				return nil, err
