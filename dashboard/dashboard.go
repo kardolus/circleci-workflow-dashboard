@@ -2,7 +2,10 @@ package dashboard
 
 import (
 	"fmt"
+	"os"
 	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/armakuni/circleci-workflow-dashboard/circleci"
 )
@@ -22,10 +25,21 @@ type Monitor struct {
 type Monitors []Monitor
 
 func NewMonitor(project circleci.Project, pipeline circleci.Pipeline, workflow circleci.Workflow, status, link string) Monitor {
+	projectName := project.Name()
+	branchName := pipeline.VCS.Branch
+
+	if hide := os.Getenv("HIDE_ORGANIZATION"); hide != "" {
+		projectName = strings.ReplaceAll(projectName, hide+"/", "")
+	}
+
+	if hideBranch, _ := strconv.ParseBool(os.Getenv("HIDE_BRANCH")); hideBranch {
+		branchName = ""
+	}
+
 	return Monitor{
-		Name:     project.Name(),
+		Name:     projectName,
 		Workflow: workflow.Name,
-		Branch:   pipeline.VCS.Branch,
+		Branch:   branchName,
 		Status:   status,
 		Link:     link,
 	}
